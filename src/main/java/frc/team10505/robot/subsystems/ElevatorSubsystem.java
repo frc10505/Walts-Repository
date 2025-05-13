@@ -71,8 +71,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     private final Mechanism2d UppyDownyHome = new Mechanism2d(10, 10);
 
     // Sim variables
-    private MechanismLigament2d UppyDowny = new MechanismLigament2d("getName", KA, ELEVATOR_MOTOR_CURRENT_LIMIT, ELEVATOR_GEARSTACK, null);
-    private MechanismRoot2d UppyDownyRoot = UppyDownyHome.getRoot("Elevator", 0, 0);
+    private MechanismLigament2d UppyDowny = new MechanismLigament2d("Elevator", KA, ELEVATOR_MOTOR_CURRENT_LIMIT, ELEVATOR_GEARSTACK, null);
+    private MechanismRoot2d UppyDownyRoot = UppyDownyHome.getRoot("ElevatorRoot", 0, 0);
 
     //Physics
     //NOTE: I copied this because I don't have access to the robot. :]
