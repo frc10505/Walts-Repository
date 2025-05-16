@@ -21,12 +21,18 @@ import au.grapplerobotics.LaserCan;
 
 public class CoralSubsystem extends SubsystemBase {
 
-    //Konstants test
+    //Konstant
     private static final int kFlywheelLeft = 1;
     private static final int kFlywheelRight = 2;
 
+    public static final int INTAKE_MOTOR_CURRENT_LIMIT = 10;
+
     //Mystery Stuph Defining
     private int kFlywheelMotorCurrentLimit = 30;
+    private double simMotorSpeed = 0.0;
+    private SparkMaxConfig intakeLeftConfig = new SparkMaxConfig();
+    private SparkMaxConfig intakeRightConfig = new SparkMaxConfig();
+
 
 
     //Variables
@@ -34,26 +40,56 @@ public class CoralSubsystem extends SubsystemBase {
     private SparkMax flywheelLeft = new SparkMax(kFlywheelRight, MotorType.kBrushless);
 
     //Sim Stuph
-    private final Mechanism2d flywheelLeftHome = new Mechanism2d(5, 5);
-    private final Mechanism2d flywheelRightHome = new Mechanism2d(5, 5);
+    private final Mechanism2d flywheelHome = new Mechanism2d(5, 5);
 
     //Sim Variables
     private MechanismLigament2d flywheelLeftSim = new MechanismLigament2d("Left Wheel", kFlywheelRight, kFlywheelMotorCurrentLimit, kFlywheelLeft, null);
     private MechanismLigament2d flywheelRightSim = new MechanismLigament2d("Right Wheel", kFlywheelLeft, kFlywheelMotorCurrentLimit, kFlywheelRight, null);
 
-    //Physics (The Dog)
+    //The Goods...
+    private final FlywheelSim intakeLeftSim = new FlywheelSim(
+            LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.005, 5), DCMotor.getNEO(1)); //All the numbers (meaning the 0.005 and 5) have been burgled from Motion Magic and Sim
+
+    private final FlywheelSim intakeRightSim = new FlywheelSim(
+            LinearSystemId.createFlywheelSystem(DCMotor.getNEO(1), 0.005, 5), DCMotor.getNEO(1)); //All the numbers (meaning the 0.005 and 5) have been burgled from Motion Magic and Sim
+
+    private final MechanismRoot2d intakeLeftRoot = flywheelHome.getRoot("Intake Left Root", .6, 0.6); //Cords have been burgled too :)
+    private final MechanismRoot2d intakeRightRoot = flywheelHome.getRoot("Intake Right Root", 2.4, 0.6); //Cords have been burgled too :)
+
+    private final MechanismLigament2d leftIntakeViz = intakeLeftRoot
+            .append(new MechanismLigament2d("leftIntakeLigament", 0.4, 000)); //All the numbers (meaning the 0.4 and 000) have been burgled from Motion Magic and Sim
+    private final MechanismLigament2d rightIntakeViz = intakeRightRoot
+            .append(new MechanismLigament2d("rightIntakeLigament", 0.4, 180)); //All the numbers (meaning the 0.4 and 180) have been burgled from Motion Magic and Sim
+
+    private double simMotorSpeed = 0.0;
+    private double simMotorSpeed2 = 0.0;
 
     //Commands
     public Command setFlywheelSpeed(SparkMax kflywheelSpeed) {
-        return runOnce(() -> {
-        flywheelLeft = kflywheelSpeed;
-        flywheelRight = kflywheelSpeed;
-        });
-    }
+        if (Utils.isSimulation()) {
+                return runOnce(() -> {
+                        simMotorSpeed = kflywheelSpeed;
+                });
+        } else {
+                return runOnce(() -> {
+                        flywheelLeft.set(kflywheelSpeed);
+                        flywheelRight.set(kflywheelSpeed);
+                })
+        }
+}     
+       
+    
+    
 
-    //Constructors
+    //Constructor
     public CoralSubsystem() {
-      
+      //Intake Config
+      intakeLeftConfig.idleMode(IdleMode.kBrake);
+      intakeRightConfig.idleMode(IdleMode.kBrake);
+      intakeLeftConfig.smartCurrentLimit(INTAKE_MOTOR_CURRENT_LIMIT);
+      intakeRightConfig.smartCurrentLimit(INTAKE_MOTOR_CURRENT_LIMIT);
+      intakeLeft.configure(intakeLeftConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        intakeRight.configure(intakeRightConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
 
@@ -61,7 +97,16 @@ public class CoralSubsystem extends SubsystemBase {
     public void periodic (){
 
         if (Utils.isSimulation()) {
+var leftCurrentPosition = flywheelLeft.getAngle();
+var rightCurrentPosition = flywheelRight.getAngle();
 
+SmartDashboard.putNumber("Sim motor speed", simMotorSpeed);
+
+intakeLeftSim.setInput(simMotorSpeed);
+            intakeLeftSim.update(0.001);
+
+                leftIntakeViz.setAngle(leftCurrentPos + (intakeLeftSim.getAngularVelocityRPM() * 0.04));
+            rightIntakeViz.setAngle(rightCurrentPos - (intakeRightSim.getAngularVelocityRPM() * 0.04));
         } else {
 
         }
