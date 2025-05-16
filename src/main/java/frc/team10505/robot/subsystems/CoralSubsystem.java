@@ -21,7 +21,7 @@ import au.grapplerobotics.LaserCan;
 
 public class CoralSubsystem extends SubsystemBase {
 
-    //Konstants
+    //Konstants test
     private static final int kFlywheelLeft = 1;
     private static final int kFlywheelRight = 2;
 
