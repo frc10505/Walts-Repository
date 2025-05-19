@@ -3,15 +3,17 @@ package frc.team10505.robot;
 import com.ctre.phoenix6.Utils;
 
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.team10505.robot.subsystems.CoralSubsystem;
 
 public class RobotContainer {
     
-    priavte final CommandXboxController Driver = new CommandXboxController(0);
+    private final CommandXboxController Driver = new CommandXboxController(0);
     private final CommandXboxController Operator = new CommandXboxController(1);
 
     // Control Systems
-    private final CoralSubsystemSubsystem CoralSubsystem = new CoralSubsystem();
+    private final CoralSubsystem CoralSubsystem = new CoralSubsystem();
+    private CommandJoystick joystick = new CommandJoystick(0);
 
     private void configBindings(){
     if (Utils.isSimulation()) {
@@ -26,10 +28,6 @@ public class RobotContainer {
     }}
 
     public RobotContainer() {
-        if (Utils.isSimulation()) {
-            simConfigAlgaeButtonBindings();
-        }else{
-            configAlgaeButtonBindings();
-        }
+      configBindings();
     }
-}//Test
+}
